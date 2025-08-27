@@ -20,7 +20,7 @@ from fido2.cose import CoseKey
 
 from fido_mds.exceptions import AttestationVerificationError, MetadataValidationError
 from fido_mds.helpers import cert_chain_verified, hash_with, load_raw_cert
-from fido_mds.models.fido_mds import Entry, FidoMD
+from fido_mds.models.fido_mds import FidoMD, MetadataEntry
 from fido_mds.models.webauthn import Attestation, AttestationFormat
 
 __author__ = "lundberg"
@@ -46,7 +46,7 @@ class FidoMetadataStore:
             with resources.open_text("fido_mds.data", "metadata.json") as f:
                 self.metadata = FidoMD.model_validate_json(f.read())
 
-        self._entry_cache: Dict[Union[str, UUID], Entry] = {}
+        self._entry_cache: Dict[Union[str, UUID], MetadataEntry] = {}
         self._other_cache: Dict[str, List[Union[str, int]]] = {}
         self.external_root_certs: Dict[str, List[Certificate]] = {}
 
@@ -85,7 +85,7 @@ class FidoMetadataStore:
             certs.append(load_raw_cert(cert=cert))
         self.external_root_certs[name] = certs
 
-    def get_entry_for_aaguid(self, aaguid: UUID) -> Optional[Entry]:
+    def get_entry_for_aaguid(self, aaguid: UUID) -> Optional[MetadataEntry]:
         if aaguid in self._entry_cache:
             return self._entry_cache[aaguid]
 
@@ -95,7 +95,9 @@ class FidoMetadataStore:
                 return entry
         return None
 
-    def get_entry_for_certificate_key_identifier(self, cki: str) -> Optional[Entry]:
+    def get_entry_for_certificate_key_identifier(
+        self, cki: str
+    ) -> Optional[MetadataEntry]:
         if cki in self._entry_cache:
             return self._entry_cache[cki]
 
@@ -108,7 +110,7 @@ class FidoMetadataStore:
                 return entry
         return None
 
-    def get_entry(self, authenticator_id: Union[UUID, str]) -> Optional[Entry]:
+    def get_entry(self, authenticator_id: Union[UUID, str]) -> Optional[MetadataEntry]:
         if isinstance(authenticator_id, UUID):
             return self.get_entry_for_aaguid(aaguid=authenticator_id)
         else:

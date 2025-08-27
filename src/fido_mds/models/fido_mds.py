@@ -246,7 +246,7 @@ class StatusReport(BaseModel):
     )
 
 
-class Entry(BaseModel):
+class MetadataEntry(BaseModel):
     metadata_statement: "MetadataStatement" = Field(..., alias="metadataStatement")
     status_reports: List["StatusReport"] = Field(..., alias="statusReports")
     time_of_last_status_change: datetime = Field(..., alias="timeOfLastStatusChange")
@@ -269,7 +269,7 @@ class FidoMD(BaseModel):
     legal_header: str = Field(..., alias="legalHeader")
     no: int
     next_update: datetime = Field(..., alias="nextUpdate")
-    entries: List["Entry"]
+    entries: List["MetadataEntry"]
 
     # validators
     _next_update_to_datetime = field_validator("next_update", mode="before")(
