@@ -39,7 +39,6 @@ eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiMlpLQ1NDMWRCOU1CbnBqWGZoLXhY
 biI6Imh0dHBzOi8vZGFzaGJvYXJkLmVkdWlkLmRvY2tlciIsImNyb3NzT3JpZ2luIjpmYWxzZX0
 """
 
-
 # apple
 # XXX: iphone authenticator cert is valid for three days
 iphone_12_attestation_object = """
