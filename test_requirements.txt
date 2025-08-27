@@ -1,10 +1,6 @@
 -r requirements.txt
 
+uv
 pytest
-black
+ruff
 mypy
-
-# typing stubs
-typing_extensions
-types-cryptography
-types-pyOpenSSL
