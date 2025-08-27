@@ -74,8 +74,10 @@ class AttestationStatement(AttestationConfig):
     def validate_response(cls, v: bytes) -> Optional[AttestationStatementResponse]:
         header, payload, signature = v.decode(encoding="utf-8").split(".")
         return AttestationStatementResponse(
-            header=AttestationStatementResponseHeader.parse_raw(websafe_decode(header)),
-            payload=AttestationStatementResponsePayload.parse_raw(
+            header=AttestationStatementResponseHeader.model_validate_json(
+                websafe_decode(header)
+            ),
+            payload=AttestationStatementResponsePayload.model_validate_json(
                 websafe_decode(payload)
             ),
             signature=signature,
