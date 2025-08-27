@@ -1,5 +1,6 @@
-import setuptools
 from datetime import datetime
+
+import setuptools
 
 current_version = datetime.utcnow().strftime("%Y.%m")
 
@@ -7,13 +8,13 @@ with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name='fido-mds',
+    name="fido-mds",
     version=current_version,
-    url='https://github.com/SUNET/python-fido-mds',
-    license='BSD 3-Clause',
-    author='Johan Lundberg',
-    author_email='lundberg@sunet.se',
-    description='FIDO Alliance Metadata Service in a package',
+    url="https://github.com/SUNET/python-fido-mds",
+    license="BSD 3-Clause",
+    author="Johan Lundberg",
+    author_email="lundberg@sunet.se",
+    description="FIDO Alliance Metadata Service in a package",
     long_description=long_description,
     long_description_content_type="text/markdown",
     classifiers=[

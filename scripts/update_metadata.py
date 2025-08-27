@@ -2,40 +2,43 @@
 import json
 import sys
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
 
-from OpenSSL import crypto
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 from jwcrypto import jwk, jws
+from OpenSSL import crypto
 
+__author__ = "lundberg"
 
-__author__ = 'lundberg'
-
-METADATA = Path('./fido_alliance_mds.jwt')
-ROOT_CERT = Path('./globalsign_root_r3.der')
-CN = 'mds.fidoalliance.org'
+METADATA = Path("./fido_alliance_mds.jwt")
+ROOT_CERT = Path("./globalsign_root_r3.der")
+CN = "mds.fidoalliance.org"
 
 
 def load_root_cert(path: Path) -> x509.Certificate:
     try:
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             return x509.load_der_x509_certificate(f.read())
     except IOError as e:
-        print(f'Could not open {path}: {e}')
+        print(f"Could not open {path}: {e}")
         sys.exit(1)
 
 
 def load_cert_from_str(cert: str) -> x509.Certificate:
-    raw_cert = f'-----BEGIN CERTIFICATE-----\n{cert}\n-----END CERTIFICATE-----'
+    raw_cert = f"-----BEGIN CERTIFICATE-----\n{cert}\n-----END CERTIFICATE-----"
     return x509.load_pem_x509_certificate(raw_cert.encode())
 
 
-def get_valid_cert(cert_chain: List[str], cn: str, root_cert: x509.Certificate) -> Optional[x509.Certificate]:
+def get_valid_cert(
+    cert_chain: List[str], cn: str, root_cert: x509.Certificate
+) -> Optional[x509.Certificate]:
     if not cert_chain:
         return None
 
-    cert_to_check = load_cert_from_str(cert_chain[0])  # first cert is the one used to sign the jwt
+    cert_to_check = load_cert_from_str(
+        cert_chain[0]
+    )  # first cert is the one used to sign the jwt
 
     # create store and add root cert
     store = crypto.X509Store()
@@ -67,7 +70,7 @@ def load_jwk_from_x5c(x5c: List[str], root_cert: x509.Certificate) -> Optional[j
         _jwk = jwk.JWK.from_pyca(valid_cert.public_key())
         return _jwk
     except ValueError as e:
-        print(f'Could not load JWK from certificate chain: {e}')
+        print(f"Could not load JWK from certificate chain: {e}")
 
     return None
 
@@ -75,13 +78,13 @@ def load_jwk_from_x5c(x5c: List[str], root_cert: x509.Certificate) -> Optional[j
 def load_metadata(path: Path, root_cert: x509.Certificate) -> Optional[Dict[str, Any]]:
     _jws = jws.JWS()
     try:
-        with open(path, 'r') as f:
+        with open(path, "r") as f:
             # deserialize jws
             _jws.deserialize(raw_jws=f.read())
     except IOError as e:
-        print(f'Could not open {path}: {e}')
+        print(f"Could not open {path}: {e}")
     except (jws.InvalidJWSObject, IndexError):
-        print(f'metadata could not be deserialized')
+        print(f"metadata could not be deserialized")
         return None
 
     # load JOSE headers
@@ -95,7 +98,7 @@ def load_metadata(path: Path, root_cert: x509.Certificate) -> Optional[Dict[str,
     # verify jws
     verified = False
     for header in headers:
-        cert_chain = header.get('x5c', [])
+        cert_chain = header.get("x5c", [])
         try:
             _jwk = load_jwk_from_x5c(x5c=cert_chain, root_cert=root_cert)
             _jws.verify(key=_jwk)
@@ -116,5 +119,9 @@ def get_metadata(metadata_path: Path, root_cert_path: Path) -> Dict[str, Any]:
     return metadata
 
 
-if __name__ == '__main__':
-    print(json.dumps(get_metadata(metadata_path=METADATA, root_cert_path=ROOT_CERT), indent=4))
+if __name__ == "__main__":
+    print(
+        json.dumps(
+            get_metadata(metadata_path=METADATA, root_cert_path=ROOT_CERT), indent=4
+        )
+    )

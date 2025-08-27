@@ -75,7 +75,9 @@ class AttestationStatement(AttestationConfig):
         header, payload, signature = v.decode(encoding="utf-8").split(".")
         return AttestationStatementResponse(
             header=AttestationStatementResponseHeader.parse_raw(websafe_decode(header)),
-            payload=AttestationStatementResponsePayload.parse_raw(websafe_decode(payload)),
+            payload=AttestationStatementResponsePayload.parse_raw(
+                websafe_decode(payload)
+            ),
             signature=signature,
         )
 
@@ -137,7 +139,9 @@ class Attestation(AttestationConfig):
     @property
     def certificate_key_identifier(self) -> Optional[str]:
         if self.fmt is AttestationFormat.FIDO_U2F and self.att_statement.x5c:
-            cki = x509.SubjectKeyIdentifier.from_public_key(self.att_statement.x5c[0].public_key())
+            cki = x509.SubjectKeyIdentifier.from_public_key(
+                self.att_statement.x5c[0].public_key()
+            )
             return cki.digest.hex()
         return None
 
