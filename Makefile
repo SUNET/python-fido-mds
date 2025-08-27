@@ -1,11 +1,14 @@
 TOPDIR:=        $(abspath .)
 SOURCE=         $(TOPDIR)/src
 PYTHON=         $(shell which python)
-PIP=            $(shell which pip)
+UV=             $(shell which uv)
+PIPSYNC=        $(UV) pip sync
 
 reformat:
-	isort --line-width 120 --atomic $(SOURCE)
-	black --line-length 120 --skip-string-normalization $(SOURCE)
+	# sort imports and remove unused imports
+	ruff check --select F401,I --fix
+	# reformat
+	ruff format
 
 typecheck:
 	MYPYPATH=$(SOURCE) mypy --ignore-missing-imports -p fido_mds
@@ -17,5 +20,10 @@ test:
 	pytest src
 
 build:
-	$(PIP) install build[virtualenv]
+	$(UV) pip install build[virtualenv]
 	$(PYTHON) -m build
+
+dev_sync_deps:
+	@test $${VIRTUAL_ENV?virtual env not activated}
+	$(PIPSYNC) test_requirements.txt
+	$(UV) pip install -r test_requirements.txt
