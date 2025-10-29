@@ -11,6 +11,7 @@ from fido_mds.tests.data import (
     IPHONE_12,
     MICROSOFT_SURFACE_1796,
     NEXUS_5,
+    PIXEL_8A,
     YUBIKEY_4,
     YUBIKEY_5_NFC,
 )
@@ -19,7 +20,8 @@ __author__ = "lundberg"
 
 
 @pytest.mark.parametrize(
-    "attestation_obj,client_data", [YUBIKEY_4, YUBIKEY_5_NFC, MICROSOFT_SURFACE_1796]
+    "attestation_obj,client_data",
+    [YUBIKEY_4, YUBIKEY_5_NFC, MICROSOFT_SURFACE_1796, PIXEL_8A],
 )
 def test_verify(mds: FidoMetadataStore, attestation_obj: str, client_data: str):
     att = Attestation.from_base64(attestation_obj)

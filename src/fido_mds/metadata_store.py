@@ -15,11 +15,14 @@ from fido2.attestation import (
     TpmAttestation,
 )
 from fido2.attestation import Attestation as Fido2Attestation
-from fido2.attestation.base import InvalidAttestation
+from fido2.attestation.base import (
+    InvalidAttestation,
+)
 from fido2.cose import CoseKey
 
 from fido_mds.exceptions import AttestationVerificationError, MetadataValidationError
 from fido_mds.helpers import cert_chain_verified, hash_with, load_raw_cert
+from fido_mds.models.attestation import AndroidKeyAttestation
 from fido_mds.models.fido_mds import FidoMD, MetadataEntry
 from fido_mds.models.webauthn import Attestation, AttestationFormat
 
@@ -165,29 +168,35 @@ class FidoMetadataStore:
         return list(res)
 
     def verify_attestation(self, attestation: Attestation, client_data: bytes) -> bool:
-        if attestation.fmt is AttestationFormat.PACKED:
-            return self.verify_packed_attestation(
-                attestation=attestation, client_data=client_data
-            )
-        if attestation.fmt is AttestationFormat.APPLE:
-            return self.verify_apple_anonymous_attestation(
-                attestation=attestation, client_data=client_data
-            )
-        if attestation.fmt is AttestationFormat.TPM:
-            return self.verify_tpm_attestation(
-                attestation=attestation, client_data=client_data
-            )
-        if attestation.fmt is AttestationFormat.ANDROID_SAFETYNET:
-            return self.verify_android_safetynet_attestation(
-                attestation=attestation, client_data=client_data
-            )
-        if attestation.fmt is AttestationFormat.FIDO_U2F:
-            return self.verify_fido_u2f_attestation(
-                attestation=attestation, client_data=client_data
-            )
-        raise NotImplementedError(
-            f"verification of {attestation.fmt.value} not implemented"
-        )
+        match attestation.fmt:
+            case AttestationFormat.PACKED:
+                return self.verify_packed_attestation(
+                    attestation=attestation, client_data=client_data
+                )
+            case AttestationFormat.APPLE:
+                return self.verify_apple_anonymous_attestation(
+                    attestation=attestation, client_data=client_data
+                )
+            case AttestationFormat.TPM:
+                return self.verify_tpm_attestation(
+                    attestation=attestation, client_data=client_data
+                )
+            case AttestationFormat.ANDROID_SAFETYNET:
+                return self.verify_android_safetynet_attestation(
+                    attestation=attestation, client_data=client_data
+                )
+            case AttestationFormat.ANDROID_KEY:
+                return self.verify_android_key_attestation(
+                    attestation=attestation, client_data=client_data
+                )
+            case AttestationFormat.FIDO_U2F:
+                return self.verify_fido_u2f_attestation(
+                    attestation=attestation, client_data=client_data
+                )
+            case _:
+                raise NotImplementedError(
+                    f"verification of {attestation.fmt.value} not implemented"
+                )
 
     def verify_packed_attestation(
         self, attestation: Attestation, client_data: bytes
@@ -279,6 +288,17 @@ class FidoMetadataStore:
         ):
             return True
         raise MetadataValidationError(ERROR_MSG_CERT_DOES_NOT_MATCH)
+
+    def verify_android_key_attestation(
+        self, attestation: Attestation, client_data: bytes
+    ) -> bool:
+        client_data_hash = hash_with(hash_alg=SHA256(), data=client_data)
+        self._verify_attestation_as_type(
+            AndroidKeyAttestation,
+            attestation=attestation,
+            client_data_hash=client_data_hash,
+        )
+        return True
 
     def verify_fido_u2f_attestation(
         self, attestation: Attestation, client_data: bytes
