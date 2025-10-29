@@ -14,8 +14,10 @@ __author__ = "lundberg"
 logger = logging.getLogger(__name__)
 
 
-def hash_with(hash_alg: HashAlgorithm, data: bytes) -> bytes:
+def hash_with(hash_alg: HashAlgorithm, data: bytes | str) -> bytes:
     h = hashes.Hash(hash_alg)
+    if isinstance(data, str):
+        data = data.encode()
     h.update(data)
     return h.finalize()
 
