@@ -1,6 +1,7 @@
 from logging import getLogger
 from typing import Any, Mapping
 
+from asn1crypto.core import Sequence as Asn1Sequence
 from cryptography import x509
 from cryptography.exceptions import InvalidSignature as _InvalidSignature
 from cryptography.hazmat.backends import default_backend
@@ -47,7 +48,6 @@ class AndroidKeyAttestation(Attestation):
 
         Raises InvalidData if validation fails.
         """
-        from asn1crypto.core import Sequence as Asn1Sequence
 
         key_desc = Asn1Sequence.load(ext_value)
 
@@ -89,7 +89,8 @@ class AndroidKeyAttestation(Attestation):
                     logger.warning(
                         f"Possible allApplications field in {auth_list_name}"
                     )
-            except Exception as e:
+            except (ValueError, TypeError, AttributeError) as e:
+                # Handle ASN.1 serialization errors
                 logger.debug(f"Could not validate {auth_list_name}: {e}")
 
         # Verify origin field (tag 702) in hardwareEnforced
