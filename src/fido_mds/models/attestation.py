@@ -88,9 +88,7 @@ class AndroidKeyAttestation(Attestation):
                 # This field should NOT be present in secure attestations
                 if b"\xbf\x84\x58" in auth_list_bytes:
                     logger.error(f"allApplications field found in {auth_list_name}")
-                    raise InvalidData(
-                        f"AuthorizationList.allApplications found in {auth_list_name}"
-                    )
+                    raise InvalidData(f"AuthorizationList.allApplications found in {auth_list_name}")
             except (ValueError, TypeError, AttributeError) as e:
                 # Handle ASN.1 serialization errors
                 logger.debug(f"Could not validate {auth_list_name}: {e}")
@@ -103,9 +101,7 @@ class AndroidKeyAttestation(Attestation):
 
         origin_tag = b"\xbf\x85>"  # Tag 702 encoded (0xBF 0x85 0x3E)
         if origin_tag not in hw_enforced_bytes:
-            logger.error(
-                "Origin field (tag 702) not found in hardwareEnforced authorization list"
-            )
+            logger.error("Origin field (tag 702) not found in hardwareEnforced authorization list")
             raise InvalidData(f"Origin field check failed")
         logger.debug("Found origin field (tag 702) in hardwareEnforced")
 
@@ -114,9 +110,7 @@ class AndroidKeyAttestation(Attestation):
         # Tag 1 in DER with context-specific encoding: 0xA1
         purpose_tag = b"\xa1"  # Tag 1 encoded
         if purpose_tag not in hw_enforced_bytes:
-            logger.error(
-                "Purpose field (tag 1) not found in hardwareEnforced authorization list"
-            )
+            logger.error("Purpose field (tag 1) not found in hardwareEnforced authorization list")
             raise InvalidData(f"Purpose field check failed")
         logger.debug("Found purpose field (tag 1) in hardwareEnforced")
 
@@ -167,9 +161,7 @@ class AndroidKeyAttestation(Attestation):
         cred_pub_key = auth_data.credential_data.public_key
 
         if cose_key != cred_pub_key:
-            raise InvalidData(
-                "Certificate public key does not match credential public key"
-            )
+            raise InvalidData("Certificate public key does not match credential public key")
 
         # Verify the attestation certificate extension data
         # OID for Key Description extension: 1.3.6.1.4.1.11129.2.1.17
@@ -177,9 +169,7 @@ class AndroidKeyAttestation(Attestation):
         try:
             ext = cert.extensions.get_extension_for_oid(ext_oid)
         except x509.ExtensionNotFound:
-            raise InvalidData(
-                f"Certificate missing Android Key attestation extension {ext_oid}"
-            )
+            raise InvalidData(f"Certificate missing Android Key attestation extension {ext_oid}")
 
         # Parse the extension value
         # The extension value is ASN.1 DER encoded KeyDescription

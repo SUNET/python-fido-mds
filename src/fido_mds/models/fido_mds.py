@@ -55,9 +55,7 @@ class Option(BaseModel):
     client_pin: Optional[bool] = Field(None, alias="clientPin")
     up: Optional[bool] = None
     uv: Optional[bool] = None
-    user_verification_mgmt_preview: Optional[bool] = Field(
-        None, alias="userVerificationMgmtPreview"
-    )
+    user_verification_mgmt_preview: Optional[bool] = Field(None, alias="userVerificationMgmtPreview")
     credential_mgmt_preview: Optional[bool] = Field(None, alias="credentialMgmtPreview")
     plat: Optional[bool] = None
     bio_enroll: Optional[bool] = Field(None, alias="bioEnroll")
@@ -70,9 +68,7 @@ class Option(BaseModel):
     always_uv: Optional[bool] = Field(None, alias="alwaysUv")
     pin_uv_auth_token: Optional[bool] = Field(None, alias="pinUvAuthToken")
     make_cred_uv_not_rqd: Optional[bool] = Field(None, alias="makeCredUvNotRqd")
-    no_mc_ga_permissions_with_client_pin: Optional[bool] = Field(
-        None, alias="noMcGaPermissionsWithClientPin"
-    )
+    no_mc_ga_permissions_with_client_pin: Optional[bool] = Field(None, alias="noMcGaPermissionsWithClientPin")
     uv_acfg: Optional[bool] = Field(None, alias="uvAcfg")
 
 
@@ -89,29 +85,19 @@ class AuthenticatorGetInfo(BaseModel):
     options: Optional["Option"] = None
     max_msg_size: Optional[int] = Field(None, alias="maxMsgSize")
     pin_uv_auth_protocols: Optional[List[int]] = Field([], alias="pinUvAuthProtocols")
-    max_credential_count_in_list: Optional[int] = Field(
-        None, alias="maxCredentialCountInList"
-    )
+    max_credential_count_in_list: Optional[int] = Field(None, alias="maxCredentialCountInList")
     max_credential_id_length: Optional[int] = Field(None, alias="maxCredentialIdLength")
     transports: Optional[List[str]] = []
     algorithms: Optional[List["Algorithm"]] = []
     firmware_version: Optional[int] = Field(None, alias="firmwareVersion")
-    max_serialized_large_blob_array: Optional[int] = Field(
-        None, alias="maxSerializedLargeBlobArray"
-    )
+    max_serialized_large_blob_array: Optional[int] = Field(None, alias="maxSerializedLargeBlobArray")
     force_pin_change: Optional[bool] = Field(None, alias="forcePINChange")
     min_pin_length: Optional[int] = Field(None, alias="minPINLength")
     max_cred_blob_length: Optional[int] = Field(None, alias="maxCredBlobLength")
-    max_rpi_ds_for_set_min_pin_length: Optional[int] = Field(
-        None, alias="maxRPIDsForSetMinPINLength"
-    )
+    max_rpi_ds_for_set_min_pin_length: Optional[int] = Field(None, alias="maxRPIDsForSetMinPINLength")
     certifications: Optional["Certification"] = None
-    remaining_discoverable_credentials: Optional[int] = Field(
-        None, alias="remainingDiscoverableCredentials"
-    )
-    preferred_platform_uv_attempts: Optional[int] = Field(
-        None, alias="preferredPlatformUvAttempts"
-    )
+    remaining_discoverable_credentials: Optional[int] = Field(None, alias="remainingDiscoverableCredentials")
+    preferred_platform_uv_attempts: Optional[int] = Field(None, alias="preferredPlatformUvAttempts")
     uv_modality: Optional[int] = Field(None, alias="uvModality")
 
 
@@ -179,43 +165,29 @@ class MetadataStatement(BaseModel):
     schema_: int = Field(..., alias="schema")
     upv: List["Upv"]
     authentication_algorithms: List[str] = Field(..., alias="authenticationAlgorithms")
-    public_key_alg_and_encodings: List[str] = Field(
-        ..., alias="publicKeyAlgAndEncodings"
-    )
+    public_key_alg_and_encodings: List[str] = Field(..., alias="publicKeyAlgAndEncodings")
     attestation_types: List[str] = Field(..., alias="attestationTypes")
-    user_verification_details: List[List["UserVerificationDetail"]] = Field(
-        ..., alias="userVerificationDetails"
-    )
+    user_verification_details: List[List["UserVerificationDetail"]] = Field(..., alias="userVerificationDetails")
     key_protection: List[str] = Field(..., alias="keyProtection")
     matcher_protection: List[str] = Field(..., alias="matcherProtection")
     attachment_hint: List[str] = Field(..., alias="attachmentHint")
     tc_display: List[str] = Field(..., alias="tcDisplay")
-    attestation_root_certificates: List[str] = Field(
-        ..., alias="attestationRootCertificates"
-    )
+    attestation_root_certificates: List[str] = Field(..., alias="attestationRootCertificates")
     aaguid: Optional[str] = None
     crypto_strength: Optional[int] = Field(None, alias="cryptoStrength")
     icon: Optional[str] = None
-    authenticator_get_info: Optional["AuthenticatorGetInfo"] = Field(
-        None, alias="authenticatorGetInfo"
-    )
+    authenticator_get_info: Optional["AuthenticatorGetInfo"] = Field(None, alias="authenticatorGetInfo")
     is_key_restricted: Optional[bool] = Field(None, alias="isKeyRestricted")
-    is_fresh_user_verification_required: Optional[bool] = Field(
-        None, alias="isFreshUserVerificationRequired"
-    )
-    supported_extensions: Optional[List["SupportedExtension"]] = Field(
-        [], alias="supportedExtensions"
-    )
-    alternative_descriptions: Optional["AlternativeDescription"] = Field(
-        None, alias="alternativeDescriptions"
-    )
+    is_fresh_user_verification_required: Optional[bool] = Field(None, alias="isFreshUserVerificationRequired")
+    supported_extensions: Optional[List["SupportedExtension"]] = Field([], alias="supportedExtensions")
+    alternative_descriptions: Optional["AlternativeDescription"] = Field(None, alias="alternativeDescriptions")
     attestation_certificate_key_identifiers: Optional[List[str]] = Field(
         [], alias="attestationCertificateKeyIdentifiers"
     )
     aaid: Optional[str] = None
     tc_display_content_type: Optional[str] = Field(None, alias="tcDisplayContentType")
-    tc_display_png_characteristics: Optional[List["TcDisplayPngCharacteristic"]] = (
-        Field([], alias="tcDisplayPNGCharacteristics")
+    tc_display_png_characteristics: Optional[List["TcDisplayPngCharacteristic"]] = Field(
+        [], alias="tcDisplayPNGCharacteristics"
     )
 
     def get_user_verification_details(self) -> List["UserVerificationDetail"]:
@@ -228,22 +200,16 @@ class MetadataStatement(BaseModel):
 class StatusReport(BaseModel):
     status: AuthenticatorStatus
     effective_date: datetime = Field(..., alias="effectiveDate")
-    certification_descriptor: Optional[str] = Field(
-        None, alias="certificationDescriptor"
-    )
+    certification_descriptor: Optional[str] = Field(None, alias="certificationDescriptor")
     certificate_number: Optional[str] = Field(None, alias="certificateNumber")
-    certification_policy_version: Optional[Union[float, str]] = Field(
-        None, alias="certificationPolicyVersion"
-    )
+    certification_policy_version: Optional[Union[float, str]] = Field(None, alias="certificationPolicyVersion")
     certification_requirements_version: Optional[Union[float, str]] = Field(
         None, alias="certificationRequirementsVersion"
     )
     url: Optional[str] = None
 
     # validators
-    _effective_date_to_datetime = field_validator("effective_date", mode="before")(
-        date2datetime
-    )
+    _effective_date_to_datetime = field_validator("effective_date", mode="before")(date2datetime)
 
 
 class MetadataEntry(BaseModel):
@@ -257,9 +223,9 @@ class MetadataEntry(BaseModel):
     aaid: Optional[str] = None
 
     # validators
-    _time_of_last_status_change_to_datetime = field_validator(
-        "time_of_last_status_change", mode="before"
-    )(date2datetime)
+    _time_of_last_status_change_to_datetime = field_validator("time_of_last_status_change", mode="before")(
+        date2datetime
+    )
 
     def get_latest_status_report(self) -> "StatusReport":
         return max(self.status_reports, key=lambda sr: sr.effective_date)
@@ -272,6 +238,4 @@ class FidoMD(BaseModel):
     entries: List["MetadataEntry"]
 
     # validators
-    _next_update_to_datetime = field_validator("next_update", mode="before")(
-        date2datetime
-    )
+    _next_update_to_datetime = field_validator("next_update", mode="before")(date2datetime)

@@ -30,15 +30,11 @@ def load_cert_from_str(cert: str) -> x509.Certificate:
     return x509.load_pem_x509_certificate(raw_cert.encode())
 
 
-def get_valid_cert(
-    cert_chain: List[str], cn: str, root_cert: x509.Certificate
-) -> Optional[x509.Certificate]:
+def get_valid_cert(cert_chain: List[str], cn: str, root_cert: x509.Certificate) -> Optional[x509.Certificate]:
     if not cert_chain:
         return None
 
-    cert_to_check = load_cert_from_str(
-        cert_chain[0]
-    )  # first cert is the one used to sign the jwt
+    cert_to_check = load_cert_from_str(cert_chain[0])  # first cert is the one used to sign the jwt
 
     # create store and add root cert
     store = crypto.X509Store()
@@ -120,8 +116,4 @@ def get_metadata(metadata_path: Path, root_cert_path: Path) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    print(
-        json.dumps(
-            get_metadata(metadata_path=METADATA, root_cert_path=ROOT_CERT), indent=4
-        )
-    )
+    print(json.dumps(get_metadata(metadata_path=METADATA, root_cert_path=ROOT_CERT), indent=4))
