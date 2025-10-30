@@ -4,13 +4,13 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fido-mds"
-version = "2025.10"
+version = "YYYY.MM"
 authors = [
     {name = "Johan Lundberg", email = "lundberg@sunet.se"}
 ]
 description = "FIDO Alliance Metadata Service in a package"
 readme = "README.md"
-license = {text = "BSD-3-Clause"}
+license = "BSD-3-Clause"
 requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
