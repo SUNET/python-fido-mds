@@ -62,7 +62,8 @@ def cert_chain_verified(
                 f"Root cert with SHA256 fingerprint {repr(root_cert.fingerprint(SHA256()))} matched"
             )
             return True
-        except crypto.X509StoreContextError:
+        except crypto.X509StoreContextError as e:
+            logger.debug(e)
             logger.debug(
                 f"Root cert with SHA256 fingerprint {repr(root_cert.fingerprint(SHA256()))} did NOT match"
             )
