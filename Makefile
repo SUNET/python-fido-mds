@@ -1,7 +1,6 @@
 TOPDIR:=        $(abspath .)
 SOURCE=         $(TOPDIR)/src
 UV=             $(shell which uv)
-PIPSYNC=        $(UV) pip sync
 
 reformat:
 	# sort imports and remove unused imports
@@ -26,6 +25,4 @@ build:
 	$(UV) build
 
 dev_sync_deps:
-	@test $${VIRTUAL_ENV?virtual env not activated}
-	$(PIPSYNC) test_requirements.txt
-	$(UV) pip install -r test_requirements.txt
+	$(UV) sync --all-extras pyproject.toml

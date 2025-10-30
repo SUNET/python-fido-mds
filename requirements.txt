@@ -1,5 +1,0 @@
-pydantic
-cryptography
-pyOpenSSL
-asn1crypto
-fido2>=2.0.0
