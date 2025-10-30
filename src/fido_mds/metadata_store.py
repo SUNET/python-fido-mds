@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import json
 import logging
 from importlib import resources
 from pathlib import Path
@@ -58,6 +59,10 @@ class FidoMetadataStore:
             "fido_mds.data", "apple_webauthn_root_ca.pem"
         ) as arc:
             self.add_external_root_certs(name="apple", root_certs=[arc.read()])
+        with resources.open_text(
+            "fido_mds.data", "google_hardware_attestation_root_ca.json"
+        ) as grc:
+            self.add_external_root_certs(name="google", root_certs=json.load(grc))
 
     @staticmethod
     def _verify_attestation_as_type(
@@ -298,7 +303,17 @@ class FidoMetadataStore:
             attestation=attestation,
             client_data_hash=client_data_hash,
         )
-        return True
+
+        # Validate leaf cert against Google root cert
+        if cert_chain_verified(
+            cert_chain=attestation.att_statement.x5c[
+                :-1
+            ],  # remove the root cert from the chain to use external root cert
+            root_certs=self.external_root_certs["google"],
+        ):
+            return True
+
+        raise MetadataValidationError(ERROR_MSG_CERT_DOES_NOT_MATCH)
 
     def verify_fido_u2f_attestation(
         self, attestation: Attestation, client_data: bytes
