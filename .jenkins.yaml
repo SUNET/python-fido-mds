@@ -3,6 +3,7 @@ triggers:
 pre_build_script:
   - apt-get -y install curl
 script:
+  sed -i "s/^version = .*/version = \"$(date -u +'%Y.%-m')\"/" pyproject.toml
   - python3.10 -m venv .venv
   - . .venv/bin/activate
   - pip install --upgrade uv
