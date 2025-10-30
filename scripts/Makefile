@@ -16,19 +16,22 @@ metadata.json: globalsign_root_r3.der fido_alliance_mds.jwt
 apple_webauthn_root_ca.pem:
 	$(CURL) -o apple_webauthn_root_ca.pem https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem
 
+google_hardware_attestation_root_ca.json:
+	$(CURL) -o google_hardware_attestation_root_ca.json https://android.googleapis.com/attestation/root
+
 iana_cose_algs.csv:
 	$(CURL) -o iana_cose_algs.csv https://www.iana.org/assignments/cose/algorithms.csv
 
 cose_algs: iana_cose_algs.csv
 	$(PYTHON) -c "from csv import DictReader; print({item.get('Value'): item.get('Name') for item in DictReader(open('./iana_cose_algs.csv'))})"
 
-update_package_data: metadata.json apple_webauthn_root_ca.pem
-	cp metadata.json apple_webauthn_root_ca.pem ../src/fido_mds/data/
+update_package_data: metadata.json apple_webauthn_root_ca.pem google_hardware_attestation_root_ca.json
+	cp metadata.json apple_webauthn_root_ca.pem google_hardware_attestation_root_ca.json ../src/fido_mds/data/
 
 clean:
-	rm -f metadata.json globalsign_root_r3.der fido_alliance_mds.jwt iana_cose_algs.csv
+	rm -f metadata.json globalsign_root_r3.der fido_alliance_mds.jwt iana_cose_algs.csv google_hardware_attestation_root_ca.json apple_webauthn_root_ca.pem
 
-all: metadata.json apple_webauthn_root_ca.pem
+all: metadata.json apple_webauthn_root_ca.pem google_hardware_attestation_root_ca.json
 
 .DEFAULT_GOAL:= all
 .PHONY: all
