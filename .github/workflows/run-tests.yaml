@@ -27,6 +27,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade uv
+          uv venv
           uv pip install -e ".[dev]"
           uv pip install -r scripts/requirements.txt
 
@@ -51,6 +52,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade uv
+          uv venv
           uv pip install -e ".[dev]"
 
       - name: Run mypy to check types
