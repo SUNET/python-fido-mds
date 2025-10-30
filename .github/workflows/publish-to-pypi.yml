@@ -30,7 +30,7 @@ jobs:
     - name: Update FIDO metadata and root certs
       if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       run: |
-        python3 -m pip install scripts/requirements.txt
+        python3 -m pip install -r scripts/requirements.txt
         make update_package_data
     - name: Install pypa/build and uv
       run: >-
