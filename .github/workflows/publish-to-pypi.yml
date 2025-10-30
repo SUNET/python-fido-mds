@@ -27,14 +27,14 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: "3.x"
-    - name: Update FIDO metadata and root certs
-      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-      run: |
-        python3 -m pip install -r scripts/requirements.txt
-        make update_package_data
     - name: Install pypa/build and uv
       run: >-
         python3 -m pip install build uv --user
+    - name: Update FIDO metadata and root certs
+      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      run: |
+        uv pip install -r scripts/requirements.txt
+        make update_package_data
     - name: Build a binary wheel and a source tarball
       if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       run: make build
