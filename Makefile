@@ -1,6 +1,5 @@
 TOPDIR:=        $(abspath .)
 SOURCE=         $(TOPDIR)/src
-PYTHON=         $(shell which python)
 UV=             $(shell which uv)
 PIPSYNC=        $(UV) pip sync
 
@@ -24,7 +23,7 @@ build:
 	sed -i "s/^version = .*/version = \"$$(date -u +'%Y.%-m')\"/" pyproject.toml
 	@echo "Updated version in pyproject.toml to: $$(date -u +'%Y.%-m')"
 	$(UV) pip install build[virtualenv]
-	$(PYTHON) -m build
+	$(UV) build
 
 dev_sync_deps:
 	@test $${VIRTUAL_ENV?virtual env not activated}

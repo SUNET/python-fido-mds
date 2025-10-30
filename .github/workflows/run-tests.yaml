@@ -33,7 +33,7 @@ jobs:
           uv pip install -r scripts/requirements.txt
 
       - name: Update package data
-        run: 
+        run:
           make update_package_data
 
       - name: Test with pytest
