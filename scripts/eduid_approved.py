@@ -90,9 +90,7 @@ def is_authenticator_mfa_approved(authenticator_info: AuthenticatorInformation) 
     )
     print(f"is_accepted_user_verification: {is_accepted_user_verification}")
     if not is_accepted_user_verification:
-        print(
-            f"user verification methods: {authenticator_info.user_verification_methods}"
-        )
+        print(f"user verification methods: {authenticator_info.user_verification_methods}")
     print(f"is_accepted_key_protection: {is_accepted_key_protection}")
     if not is_accepted_key_protection:
         print(f"key protections: {authenticator_info.key_protection}")
@@ -104,8 +102,7 @@ def is_authenticator_mfa_approved(authenticator_info: AuthenticatorInformation) 
 for metadata_entry in mds.metadata.entries:
     last_status_change = metadata_entry.time_of_last_status_change
     user_verification_methods = [
-        detail.user_verification_method
-        for detail in metadata_entry.metadata_statement.get_user_verification_details()
+        detail.user_verification_method for detail in metadata_entry.metadata_statement.get_user_verification_details()
     ]
     available_status.add(metadata_entry.status_reports[0].status)
     available_user_verification_methods.update(user_verification_methods)
@@ -132,9 +129,7 @@ for entry in parsed_entries:
 
 
 print()
-print(
-    f"{len(parsed_entries)} authenticators parsed, {approved} approved, {len(parsed_entries) - approved} rejected"
-)
+print(f"{len(parsed_entries)} authenticators parsed, {approved} approved, {len(parsed_entries) - approved} rejected")
 print(f"Available statuses: {available_status}")
 print(f"Available user verification methods: {available_user_verification_methods}")
 print(f"Available key protections: {available_key_protections}")
@@ -144,6 +139,4 @@ print(f"Unused statuses: {available_status - set(used_status)}")
 print(
     f"Unsued user verification methods: {available_user_verification_methods - set(WEBAUTHN_ALLOWED_USER_VERIFICATION_METHODS)}"
 )
-print(
-    f"Unused key protections: {available_key_protections - set(WEBAUTHN_ALLOWED_KEY_PROTECTION)}"
-)
+print(f"Unused key protections: {available_key_protections - set(WEBAUTHN_ALLOWED_KEY_PROTECTION)}")
