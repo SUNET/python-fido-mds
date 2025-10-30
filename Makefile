@@ -5,18 +5,18 @@ PIPSYNC=        $(UV) pip sync
 
 reformat:
 	# sort imports and remove unused imports
-	ruff check --select F401,I --fix
+	$(UV) run ruff check --select F401,I --fix
 	# reformat
-	ruff format
+	$(UV) run ruff format
 
 typecheck:
-	MYPYPATH=$(SOURCE) mypy --ignore-missing-imports -p fido_mds
+	MYPYPATH=$(SOURCE) $(UV) run mypy --ignore-missing-imports -p fido_mds
 
 update_package_data:
 	cd $(TOPDIR)/scripts && make update_package_data
 
 test:
-	pytest src
+	$(UV) run pytest src
 
 build:
 	# Update version to current YYYY.MM format
