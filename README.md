@@ -3,7 +3,7 @@
 FIDO Alliance Metadata Service (MDS) in a Python package with WebAuthn attestation verification.
 
 [![License](https://img.shields.io/badge/License-BSD%203--Clause-blue.svg)](https://opensource.org/licenses/BSD-3-Clause)
-[![Python](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 
 ## Overview
 
@@ -49,12 +49,24 @@ git clone https://github.com/SUNET/python-fido-mds.git
 cd python-fido-mds
 
 # Create and activate virtual environment
-python3 -m venv /path/to/virtualenv
-source /path/to/virtualenv/bin/activate
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install development dependencies
-pip install -r test_requirements.txt
+# Install in editable mode with development dependencies
+pip install -e ".[dev]"
+
+# Or using uv (faster)
+uv pip install -e ".[dev]"
+
+# Verify installation
+pytest src
+make reformat
+make typecheck
 ```
+
+This installs:
+- All runtime dependencies (fido2, pydantic, cryptography, pyOpenSSL, asn1crypto)
+- All development tools (pytest, pytest-cov, ruff, mypy)
 
 ## Quick Start
 
@@ -128,7 +140,7 @@ fido-mds/
 
 ## Requirements
 
-- Python 3.8 or higher (tested with 3.13.3)
+- Python 3.10 or higher (tested with 3.13.3)
 - fido2 >= 2.0.0
 - pydantic >= 2.0
 - cryptography

@@ -26,9 +26,9 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip virtualenv
-          pip install -r test_requirements.txt
-          pip install -r scripts/requirements.txt
+          python -m pip install --upgrade uv
+          uv pip install -e ".[dev]"
+          uv pip install -r scripts/requirements.txt
 
       - name: Update package data
         run: 
@@ -50,8 +50,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r test_requirements.txt
+          python -m pip install --upgrade uv
+          uv pip install -e ".[dev]"
 
       - name: Run mypy to check types
         run: |

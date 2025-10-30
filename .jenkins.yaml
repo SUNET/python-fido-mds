@@ -3,11 +3,11 @@ triggers:
 pre_build_script:
   - apt-get -y install curl
 script:
-  - python3.9 -m venv venv
+  - python3.10 -m venv venv
   - . venv/bin/activate
-  - pip install --upgrade pip virtualenv
-  - pip install -r test_requirements.txt
-  - pip install -r scripts/requirements.txt
+  - pip install --upgrade uv
+  - uv pip install -e ".[dev]"
+  - uv pip install -r scripts/requirements.txt
   - make update_package_data
   - make typecheck
   - make test

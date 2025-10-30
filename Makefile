@@ -20,6 +20,9 @@ test:
 	pytest src
 
 build:
+	# Update version to current YYYY.MM format
+	sed -i "s/^version = .*/version = \"$$(date -u +'%Y.%-m')\"/" pyproject.toml
+	@echo "Updated version in pyproject.toml to: $$(date -u +'%Y.%-m')"
 	$(UV) pip install build[virtualenv]
 	$(PYTHON) -m build
 
