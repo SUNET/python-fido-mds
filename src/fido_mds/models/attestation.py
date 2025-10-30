@@ -25,7 +25,7 @@ class AndroidKeyAttestation(Attestation):
     FORMAT: str = "android-key"
 
     @staticmethod
-    def _parse_key_description(ext_value: bytes, client_data_hash: bytes) -> None:
+    def _validate_key_description(ext_value: bytes, client_data_hash: bytes) -> None:
         """
         Parse and validate Android Key attestation KeyDescription extension.
 
@@ -83,15 +83,18 @@ class AndroidKeyAttestation(Attestation):
         ]:
             try:
                 auth_list_bytes = auth_list.dump()
-                # Tag 600 would be 0xA2 0x58 in context-specific encoding
-                # This is unlikely in modern KeyMint implementations
-                if b"\xa2\x58" in auth_list_bytes[:100]:
-                    logger.warning(
-                        f"Possible allApplications field in {auth_list_name}"
+                # Tag 600 (allApplications) is encoded as 0xBF 0x84 0x58 in DER
+                # Context-specific, constructed, high tag number form
+                # This field should NOT be present in secure attestations
+                if b"\xbf\x84\x58" in auth_list_bytes:
+                    logger.error(f"allApplications field found in {auth_list_name}")
+                    raise InvalidData(
+                        f"AuthorizationList.allApplications found in {auth_list_name}"
                     )
             except (ValueError, TypeError, AttributeError) as e:
                 # Handle ASN.1 serialization errors
                 logger.debug(f"Could not validate {auth_list_name}: {e}")
+                raise InvalidData(f"AuthorizationList.allApplications check failed")
 
         # Verify origin field (tag 702) in hardwareEnforced
         # Per WebAuthn spec: origin should be KM_ORIGIN_GENERATED (0)
@@ -99,26 +102,23 @@ class AndroidKeyAttestation(Attestation):
         hw_enforced_bytes = hardware_enforced.dump()
 
         origin_tag = b"\xbf\x85>"  # Tag 702 encoded (0xBF 0x85 0x3E)
-        if origin_tag in hw_enforced_bytes:
-            logger.debug("Found origin field (tag 702) in hardwareEnforced")
-        else:
-            logger.warning(
+        if origin_tag not in hw_enforced_bytes:
+            logger.error(
                 "Origin field (tag 702) not found in hardwareEnforced authorization list"
             )
+            raise InvalidData(f"Origin field check failed")
+        logger.debug("Found origin field (tag 702) in hardwareEnforced")
 
         # Verify purpose field (tag 1) in hardwareEnforced
         # Per WebAuthn spec: purpose should contain KM_PURPOSE_SIGN (2)
         # Tag 1 in DER with context-specific encoding: 0xA1
         purpose_tag = b"\xa1"  # Tag 1 encoded
-        if (
-            hw_enforced_bytes.startswith(purpose_tag)
-            or purpose_tag in hw_enforced_bytes[:50]
-        ):
-            logger.debug("Found purpose field (tag 1) in hardwareEnforced")
-        else:
-            logger.warning(
+        if purpose_tag not in hw_enforced_bytes:
+            logger.error(
                 "Purpose field (tag 1) not found in hardwareEnforced authorization list"
             )
+            raise InvalidData(f"Purpose field check failed")
+        logger.debug("Found purpose field (tag 1) in hardwareEnforced")
 
     @catch_builtins
     def verify(
@@ -184,24 +184,11 @@ class AndroidKeyAttestation(Attestation):
         # Parse the extension value
         # The extension value is ASN.1 DER encoded KeyDescription
         # Get the raw bytes from the UnrecognizedExtension
-        from cryptography.x509 import UnrecognizedExtension
-
-        if isinstance(ext.value, UnrecognizedExtension):
+        if isinstance(ext.value, x509.UnrecognizedExtension):
             ext_value = ext.value.value
         else:
             raise InvalidData("Unexpected extension type")
 
-        try:
-            self._parse_key_description(ext_value, client_data_hash)
-        except InvalidData:
-            # Re-raise InvalidData as it indicates a validation failure
-            raise
-        except (ValueError, TypeError, AttributeError) as e:
-            # Handle ASN.1 parsing errors gracefully
-            logger.warning(
-                f"Could not fully validate Android Key attestation extension: {e}"
-            )
-            # We still return success if signature and public key verification passed
-            # Full extension parsing is complex and not always required
+        self._validate_key_description(ext_value, client_data_hash)
 
         return AttestationResult(AttestationType.BASIC, x5c or [])
