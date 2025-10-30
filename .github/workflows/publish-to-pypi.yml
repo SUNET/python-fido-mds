@@ -28,8 +28,10 @@ jobs:
       with:
         python-version: "3.x"
     - name: Install pypa/build and uv
-      run: >-
-        python3 -m pip install build uv --user
+      run: |
+        python3 -m pip install uv --user
+        uv venv
+        uv pip install build
     - name: Update FIDO metadata and root certs
       if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       run: |
