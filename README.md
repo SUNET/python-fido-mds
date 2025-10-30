@@ -49,8 +49,8 @@ git clone https://github.com/SUNET/python-fido-mds.git
 cd python-fido-mds
 
 # Create and activate virtual environment
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python3 -m venv .venv
+source .venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install in editable mode with development dependencies
 pip install -e ".[dev]"
