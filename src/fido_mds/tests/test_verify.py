@@ -21,7 +21,7 @@ __author__ = "lundberg"
 
 @pytest.mark.parametrize(
     "attestation_obj,client_data",
-    [YUBIKEY_4, YUBIKEY_5_NFC, MICROSOFT_SURFACE_1796, PIXEL_8A],
+    [YUBIKEY_4, YUBIKEY_5_NFC, MICROSOFT_SURFACE_1796],
 )
 def test_verify(mds: FidoMetadataStore, attestation_obj: str, client_data: str):
     att = Attestation.from_base64(attestation_obj)
@@ -59,7 +59,7 @@ def test_verify_registration_response(mds: FidoMetadataStore):
 
 
 # test attestations with short-lived certs so metadata can't be validated
-@pytest.mark.parametrize("attestation_obj,client_data", [IPHONE_12, NEXUS_5])
+@pytest.mark.parametrize("attestation_obj,client_data", [IPHONE_12, NEXUS_5, PIXEL_8A])
 def test_verify_no_validate(
     mds: FidoMetadataStore, attestation_obj: str, client_data: str
 ):
