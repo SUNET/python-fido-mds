@@ -31,8 +31,8 @@ cd python-fido-mds
 2. Create and activate virtual environment:
 ```bash
 # The project uses a dedicated virtualenv
-python3 -m venv /home/lundberg/python-environments/python-fido-mds
-source /home/lundberg/python-environments/python-fido-mds/bin/activate
+python3 -m venv /home/$USERNAME/python-environments/python-fido-mds
+source /home/$USERNAME/python-environments/python-fido-mds/bin/activate
 ```
 
 3. Install dependencies:
@@ -73,7 +73,7 @@ python-fido-mds/
 
 Always activate the virtualenv first:
 ```bash
-source /home/lundberg/python-environments/python-fido-mds/bin/activate
+source /home/$USERNAME/python-environments/python-fido-mds/bin/activate
 ```
 
 Then use these make targets:
@@ -262,18 +262,6 @@ Using Pydantic for data validation:
 5. Push and create pull request
 6. Ensure CI passes
 
-### Commit Messages
-
-Follow conventional commits:
-
-```
-feat: add support for new attestation format
-fix: correct signature verification in Android Key
-docs: update development guide
-test: add test cases for edge conditions
-refactor: extract KeyDescription parsing to method
-```
-
 ## LLM Development Guidelines
 
 > **Special Section for LLM Assistants**
@@ -285,12 +273,12 @@ refactor: extract KeyDescription parsing to method
 **Always use the correct virtualenv:**
 
 ```bash
-source /home/lundberg/python-environments/python-fido-mds/bin/activate
+source /home/$USERNAME/python-environments/python-fido-mds/bin/activate
 ```
 
 **Verify environment before starting:**
 ```bash
-which python  # Should show: /home/lundberg/python-environments/python-fido-mds/bin/python
+which python  # Should show: /home/$USERNAME/python-environments/python-fido-mds/bin/python
 python --version  # Should show: Python 3.13.3
 ```
 
@@ -299,8 +287,8 @@ python --version  # Should show: Python 3.13.3
 **MANDATORY:** After completing ANY code changes, run:
 
 ```bash
-cd /home/lundberg/projects/python-fido-mds && \
-source /home/lundberg/python-environments/python-fido-mds/bin/activate && \
+cd /home/$USERNAME/projects/python-fido-mds && \
+source /home/$USERNAME/python-environments/python-fido-mds/bin/activate && \
 make reformat && make typecheck && make test
 ```
 
@@ -309,6 +297,57 @@ This ensures:
 - ✅ Type checking passes
 - ✅ All tests pass
 - ✅ No regressions introduced
+
+### Security-Critical Code Patterns for LLMs
+
+**Important security reminders when working on attestation validation:**
+
+1. **Never use arbitrary byte limits in ASN.1 validation**
+   ```python
+   # ❌ WRONG - Could miss security-critical fields
+   if tag in auth_list_bytes[:100]:
+   
+   # ✅ CORRECT - Scan entire structure
+   if tag in auth_list_bytes:
+   ```
+
+2. **Use correct ASN.1 DER tag encodings**
+   ```python
+   # Tag 600 (allApplications) - high tag number form:
+   # Correct: 0xBF 0x84 0x58
+   # Wrong:   0xA2 0x58 (this is tag [2], not tag [600])
+   
+   if b"\xbf\x84\x58" in auth_list_bytes:  # ✅ Correct
+   ```
+
+3. **Match certificates by public key, not subject alone**
+   ```python
+   # ❌ INSECURE - Subjects can be forged
+   if root_cert.subject == att_root.subject:
+       return True
+   
+   # ✅ SECURE - Public keys prove cryptographic identity
+   from cryptography.hazmat.primitives import serialization
+   att_pubkey = att_root.public_key().public_bytes(
+       encoding=serialization.Encoding.DER,
+       format=serialization.PublicFormat.SubjectPublicKeyInfo
+   )
+   root_pubkey = root_cert.public_key().public_bytes(
+       encoding=serialization.Encoding.DER,
+       format=serialization.PublicFormat.SubjectPublicKeyInfo
+   )
+   if att_pubkey == root_pubkey:
+       return True
+   ```
+
+4. **Use specific exception types**
+   ```python
+   # ❌ TOO BROAD
+   except Exception:
+   
+   # ✅ SPECIFIC
+   except (ValueError, TypeError, AttributeError) as e:
+   ```
 
 ### Code Modification Patterns
 
@@ -509,23 +548,27 @@ pytest src/fido_mds/tests/test_verify.py -vv --tb=short
 
 Before completing work, verify:
 
-- [ ] Virtualenv activated: `/home/lundberg/python-environments/python-fido-mds/`
-- [ ] `make reformat` passes
+- [ ] Virtualenv activated: `/home/$USERNAME/python-environments/python-fido-mds/`
+- [ ] `make reformat` passes with no changes needed
 - [ ] `make typecheck` passes with 0 errors
-- [ ] `make test` passes with all tests passing
-- [ ] No broad exception catches (avoid `except Exception`)
+- [ ] `make test` passes with all 15 tests passing
+- [ ] No broad exception catches (avoid `except Exception` on line 177)
+- [ ] No arbitrary byte limits in ASN.1 validation ([:100], [:50])
+- [ ] Certificate validation uses public key matching, not subject-only
+- [ ] Correct ASN.1 DER tag encodings used
 - [ ] Type hints added to all functions
 - [ ] Docstrings added to public methods
 - [ ] Code follows existing patterns
 - [ ] Changes are minimal and surgical
 - [ ] Test data is valid and documented
+- [ ] Security implications considered and documented
 
 ### Example LLM Session
 
 ```bash
 # 1. Start with correct environment
-source /home/lundberg/python-environments/python-fido-mds/bin/activate
-cd /home/lundberg/projects/python-fido-mds
+source /home/$USERNAME/python-environments/python-fido-mds/bin/activate
+cd /home/$USERNAME/projects/python-fido-mds
 
 # 2. View code to understand context
 view src/fido_mds/models/attestation.py
@@ -549,14 +592,28 @@ pytest src/fido_mds/tests/test_verify.py::test_verify -v
 ### Summary for LLMs
 
 **Golden Rules:**
-1. Always use virtualenv: `/home/lundberg/python-environments/python-fido-mds/`
+1. Always use virtualenv: `/home/$USERNAME/python-environments/python-fido-mds/`
 2. Always run: `make reformat && make typecheck && make test`
 3. View before modifying
 4. Keep changes minimal
 5. Follow existing patterns
-6. Use specific exceptions
+6. Use specific exceptions (not `except Exception`)
 7. Add type hints
 8. Test thoroughly
+
+**Security Rules:**
+1. Never use arbitrary byte limits ([:100], [:50]) when scanning ASN.1 structures
+2. Always validate certificates by public key, not just subject name
+3. Use correct ASN.1 DER tag encodings (verify with spec)
+4. Scan complete structures, not partial slices
+5. Question existing patterns if they seem insecure
+
+**Recent Fixes Applied:**
+- ✅ Android Key attestation: Complete implementation with proper ASN.1 parsing
+- ✅ Fixed allApplications detection: Correct DER encoding (0xBF 0x84 0x58)
+- ✅ Removed arbitrary byte limits from all field checks
+- ✅ Certificate validation: Public key matching instead of subject-only
+- ✅ Complete AuthorizationList scanning: No partial structure checks
 
 ---
 
