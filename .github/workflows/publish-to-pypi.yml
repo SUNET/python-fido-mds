@@ -23,7 +23,7 @@ jobs:
         VERSION=$(date -u +"%Y.%-m")
         echo "VERSION=${VERSION}" >> $GITHUB_ENV
         echo "Creating version: ${VERSION}"
-        sed -i "s/^version = .*/version = \"${VERSION}/" pyproject.toml
+        sed -i "s/^version = .*/version = \"${VERSION}\" pyproject.toml
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
