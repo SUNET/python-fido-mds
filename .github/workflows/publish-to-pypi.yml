@@ -9,6 +9,8 @@ jobs:
   build:
     name: Build distribution 📦
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{steps.set-version.outputs.VERSION}}
 
     steps:
     - uses: actions/checkout@v4
@@ -18,8 +20,6 @@ jobs:
 
     - name: Set version for scheduled release
       id: set-version
-      outputs:
-        version: ${{ steps.set-version.outputs.VERSION }}
       if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       run: |
         # Create version string: YYYY.MM (e.g., 2025.10)
