@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+from typing import Any, Mapping, cast
 from fido2.utils import websafe_decode
 from fido2.webauthn import RegistrationResponse
 
@@ -48,7 +49,7 @@ def test_verify_registration_response(mds: FidoMetadataStore):
         },
         "description": "test",
     }
-    registration = RegistrationResponse.from_dict(data["response"])
+    registration = RegistrationResponse.from_dict(cast(Mapping[str, Any], data["response"]))
     att = Attestation.from_attestation_object(registration.response.attestation_object)
     assert mds.verify_attestation(attestation=att, client_data=registration.response.client_data) is True
 
