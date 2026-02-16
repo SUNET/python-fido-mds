@@ -17,11 +17,14 @@ jobs:
         fetch-depth: 0  # Fetch all history for proper versioning
 
     - name: Set version for scheduled release
+      id: set-version
+      outputs:
+        version: ${{ steps.set-version.outputs.VERSION }}
       if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       run: |
         # Create version string: YYYY.MM (e.g., 2025.10)
         VERSION=$(date -u +"%Y.%-m")
-        echo "VERSION=${VERSION}" >> $GITHUB_ENV
+        echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
         echo "Creating version: ${VERSION}"
         sed -i "s/^version = .*/version = \"${VERSION}\"/" pyproject.toml
     - name: Set up Python
@@ -75,7 +78,8 @@ jobs:
       Sign the Python 🐍 distribution 📦 with Sigstore
       and upload them to GitHub Release
     needs:
-    - publish-to-pypi
+      - build
+      - publish-to-pypi
     runs-on: ubuntu-latest
 
     permissions:
@@ -97,10 +101,12 @@ jobs:
     - name: Create GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        VERSION: ${{needs.set-version.outputs.VERSION}}
       run: gh release create "$VERSION" --repo "$GITHUB_REPOSITORY" --notes ""
     - name: Upload artifact signatures to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
+        VERSION: ${{needs.set-version.outputs.VERSION}}
       # Upload to GitHub Release using the `gh` CLI.
       # `dist/` contains the built packages, and the
       # sigstore-produced signatures and certificates.
