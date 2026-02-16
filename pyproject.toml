@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fido-mds"
-version = "YYYY.MM"
+version = "0000.00"
 authors = [
     {name = "Johan Lundberg", email = "lundberg@sunet.se"}
 ]
