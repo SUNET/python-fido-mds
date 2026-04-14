@@ -49,6 +49,7 @@ where = ["src"]
 
 [tool.setuptools.package-data]
 fido_mds = [
+    "py.typed",
     "data/metadata.json",
     "data/apple_webauthn_root_ca.pem",
     "data/google_hardware_attestation_root_ca.json"
