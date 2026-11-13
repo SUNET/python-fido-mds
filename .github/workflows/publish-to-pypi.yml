@@ -31,15 +31,23 @@ jobs:
       with:
         python-version: "3.x"
     - name: Install pypa/build and uv
+      # Everything is installed from hash-locked requirements and as wheels only, so no unlocked version is
+      # resolved and no setup script runs. To update them, see .github/requirements/README.md.
       run: |
-        python3 -m pip install uv --user
+        python3 -m pip install --user --require-hashes --only-binary :all: -r .github/requirements/requirements-bootstrap.txt
         uv venv
-        uv pip install build
+        uv pip install --require-hashes --only-binary :all: -r .github/requirements/requirements-release.txt
     - name: Update FIDO metadata and root certs
       if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-      run: |
-        uv pip install -r scripts/requirements.txt
-        make update_package_data
+      env:
+        # the Makefile runs the update script with `uv run`, which must not install anything that is not locked
+        UV_NO_SYNC: "1"
+      run: make update_package_data
+    - name: Test the package with the new metadata
+      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      # The FIDO Alliance changes the metadata every month, and the tests load all of it. Without this step a
+      # release that cannot load its own data gets published (as happened with 2026.10).
+      run: PYTHONPATH=src .venv/bin/python -m pytest src
     - name: Build a binary wheel and a source tarball
       if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
       run: make build
