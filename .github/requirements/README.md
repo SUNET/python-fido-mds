@@ -8,8 +8,7 @@ are fixed and no setup script runs.
   run the tests (the package's dependencies and `pytest`) and to build.
 - `requirements-audit.in` / `.txt`: `pip-audit`, used by `audit.yml`.
 
-The `.in` files are the inputs and the `.txt` files are generated. To update the locked versions (and to pick up
-new releases of the dependencies), run from this directory:
+The `.in` files are the inputs and the `.txt` files are generated. Run from this directory:
 
 ```
 for name in bootstrap release audit; do
@@ -17,8 +16,13 @@ for name in bootstrap release audit; do
 done
 ```
 
+This keeps the versions already in the `.txt` files and only adds what changed in the `.in` files. To pick up new
+releases of the dependencies (for example to fix a vulnerability that `audit.yml` reports), add `--upgrade` to
+the command, or `--upgrade-package <name>` to upgrade a single package.
+
 Keep `requirements-release.in` in step with the dependencies in `pyproject.toml` and `scripts/requirements.txt`.
 
 `audit.yml` checks every Monday, and whenever these files change, that the locked versions have no known
-vulnerabilities, and that they install on Python 3.10 and on the latest 3.x. Dependabot (`.github/dependabot.yml`)
+vulnerabilities, and that they install, on Python 3.10 and on the latest 3.x (each is audited separately, because
+some locked versions are only used on 3.10). Dependabot (`.github/dependabot.yml`)
 proposes updates of the locked versions and of the GitHub Actions.

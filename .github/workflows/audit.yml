@@ -24,13 +24,18 @@ jobs:
   audit:
     name: Known vulnerabilities in the locked requirements
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # pip-audit evaluates the environment markers of the locked requirements against its own interpreter, so
+        # each Python is audited separately: some pins exist only for 3.10
+        python-version: ["3.10", "3.x"]
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: ${{ matrix.python-version }}
       - name: Install pip-audit
         run: |
           python3 -m venv "$RUNNER_TEMP/audit"
