@@ -30,7 +30,7 @@ jobs:
         # each Python is audited separately: some pins exist only for 3.10
         python-version: ["3.10", "3.x"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: actions/setup-python@v5
@@ -62,7 +62,7 @@ jobs:
       matrix:
         python-version: ["3.10", "3.x"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: actions/setup-python@v5
