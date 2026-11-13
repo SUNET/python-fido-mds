@@ -40,12 +40,20 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/audit"
           "$RUNNER_TEMP/audit/bin/pip" install --require-hashes --only-binary :all: -r .github/requirements/requirements-audit.txt
-      - name: Audit the requirements of the release job
+      - name: Audit the locked requirements
         run: |
           "$RUNNER_TEMP/audit/bin/pip-audit" --disable-pip --require-hashes \
             -r .github/requirements/requirements-bootstrap.txt \
             -r .github/requirements/requirements-release.txt \
             -r .github/requirements/requirements-test.txt
+      - name: Audit the requirements of pip-audit itself
+        # pip-audit audits only the files it is given, not its own environment. Only on the latest 3.x: on 3.10 the
+        # newest filelock that supports it (4.1.0) has known vulnerabilities that are fixed only in versions that
+        # need Python 3.11, so this would fail every week without anything to do about it.
+        if: ${{ !cancelled() && matrix.python-version == '3.x' }}
+        run: |
+          "$RUNNER_TEMP/audit/bin/pip-audit" --disable-pip --require-hashes \
+            -r .github/requirements/requirements-audit.txt
 
   install:
     name: The locked requirements install

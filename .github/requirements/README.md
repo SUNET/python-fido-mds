@@ -28,3 +28,7 @@ Keep `requirements-release.in` in step with the dependencies in `pyproject.toml`
 vulnerabilities, and that they install, on Python 3.10 and on the latest 3.x (each is audited separately, because
 some locked versions are only used on 3.10). Dependabot (`.github/dependabot.yml`)
 proposes updates of the locked versions and of the GitHub Actions.
+
+The requirements of `pip-audit` itself (`requirements-audit.txt`) are audited on the latest 3.x only. For Python 3.10
+the newest `filelock` is 4.1.0, which has known vulnerabilities that are fixed only in versions that need Python 3.11
+(Python 3.10 is end of life), so that check could never pass there.
