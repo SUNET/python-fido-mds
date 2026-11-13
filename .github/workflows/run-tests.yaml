@@ -5,9 +5,54 @@ name: Python package
 
 on: [push, pull_request]
 
+permissions:
+  contents: read
+
 jobs:
 
+  package-data:
+    # The FIDO Alliance rate limits the download of the metadata, and every job used to download it itself
+    # (four per run, and a run for both the push and the pull request). Download it once and give it to the tests.
+    name: Download the package data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.x
+
+      - name: Install packages
+        run: |
+          sudo apt install curl  # need curl to download metadata and certs for package data update
+
+      - name: Install dependencies
+        # hash-locked and wheels only, see .github/requirements/README.md
+        run: |
+          python3 -m pip install --user --require-hashes --only-binary :all: -r .github/requirements/requirements-bootstrap.txt
+          uv venv
+          uv pip install --require-hashes --only-binary :all: -r .github/requirements/requirements-release.txt
+
+      - name: Update package data
+        env:
+          UV_NO_SYNC: "1"
+        run: make update_package_data
+
+      - name: Store the package data
+        uses: actions/upload-artifact@v4
+        with:
+          name: package-data
+          path: |
+            src/fido_mds/data/metadata.json
+            src/fido_mds/data/apple_webauthn_root_ca.pem
+            src/fido_mds/data/google_hardware_attestation_root_ca.json
+          if-no-files-found: error
+          retention-days: 1
+
   unittests:
+    needs: package-data
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -15,35 +60,36 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install packages
-        run: |
-          sudo apt install curl  # need curl to download metadata and certs for package data update
+      - name: Get the package data
+        uses: actions/download-artifact@v4
+        with:
+          name: package-data
+          path: src/fido_mds/data
 
       - name: Install dependencies
         run: |
-          sed -i "s/^version = .*/version = \"$(date -u +'%Y.%-m')\"/" pyproject.toml
-          python -m pip install --upgrade uv
+          python3 -m pip install --user --require-hashes --only-binary :all: -r .github/requirements/requirements-bootstrap.txt
           uv venv
-          uv pip install -e ".[dev]"
-          uv pip install -r scripts/requirements.txt
-
-      - name: Update package data
-        run:
-          make update_package_data
+          uv pip install --require-hashes --only-binary :all: -r .github/requirements/requirements-test.txt
 
       - name: Test with pytest
+        # run from the source tree: `uv run` would install what is not locked
         run: |
-          make test
+          PYTHONPATH=src .venv/bin/python -m pytest src
 
   typecheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Set up Python 3.x
         uses: actions/setup-python@v5
@@ -52,13 +98,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          sed -i "s/^version = .*/version = \"$(date -u +'%Y.%-m')\"/" pyproject.toml
-          python -m pip install --upgrade uv
+          python3 -m pip install --user --require-hashes --only-binary :all: -r .github/requirements/requirements-bootstrap.txt
           uv venv
-          uv pip install -e ".[dev]"
+          uv pip install --require-hashes --only-binary :all: -r .github/requirements/requirements-test.txt
 
       - name: Run mypy to check types
         run: |
-          uv run mypy --version
-          make typecheck
-
+          .venv/bin/mypy --version
+          MYPYPATH=src .venv/bin/mypy --ignore-missing-imports -p fido_mds

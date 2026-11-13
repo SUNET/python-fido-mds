@@ -1,0 +1,2 @@
+-r requirements-release.in
+mypy

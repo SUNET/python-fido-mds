@@ -1,17 +1,19 @@
 # Requirements of the release job
 
-`publish-to-pypi.yml` installs these with `--require-hashes --only-binary :all:`, so the versions and the files
+`publish-to-pypi.yml` and `run-tests.yaml` install these with `--require-hashes --only-binary :all:`, so the versions and the files
 are fixed and no setup script runs.
 
 - `requirements-bootstrap.in` / `.txt`: `uv`, installed with pip.
 - `requirements-release.in` / `.txt`: what the job needs to update the metadata (`scripts/requirements.txt`), to
   run the tests (the package's dependencies and `pytest`) and to build.
+- `requirements-test.in` / `.txt`: what the test and type check jobs of `run-tests.yaml` need (the release
+  requirements and `mypy`).
 - `requirements-audit.in` / `.txt`: `pip-audit`, used by `audit.yml`.
 
 The `.in` files are the inputs and the `.txt` files are generated. Run from this directory:
 
 ```
-for name in bootstrap release audit; do
+for name in bootstrap release test audit; do
   uv pip compile --universal --generate-hashes --python-version 3.10 requirements-$name.in -o requirements-$name.txt
 done
 ```

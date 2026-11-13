@@ -44,7 +44,8 @@ jobs:
         run: |
           "$RUNNER_TEMP/audit/bin/pip-audit" --disable-pip --require-hashes \
             -r .github/requirements/requirements-bootstrap.txt \
-            -r .github/requirements/requirements-release.txt
+            -r .github/requirements/requirements-release.txt \
+            -r .github/requirements/requirements-test.txt
 
   install:
     name: The locked requirements install
@@ -64,3 +65,4 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/release"
           "$RUNNER_TEMP/release/bin/pip" install --require-hashes --only-binary :all: -r .github/requirements/requirements-bootstrap.txt
           "$RUNNER_TEMP/release/bin/pip" install --require-hashes --only-binary :all: -r .github/requirements/requirements-release.txt
+          "$RUNNER_TEMP/release/bin/pip" install --require-hashes --only-binary :all: -r .github/requirements/requirements-test.txt
