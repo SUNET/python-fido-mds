@@ -1,7 +1,9 @@
 CERT_URL=http://secure.globalsign.com/cacert/root-r3.crt
 MDS_URL=https://mds.fidoalliance.org
 
-CURL=$(shell which curl) -s
+# -f: an HTTP error (the FIDO service rate limits with 429) fails instead of being saved as the downloaded file
+# --retry: retry transient errors (timeouts, 429, 5xx)
+CURL=$(shell which curl) -sSfL --retry 5 --retry-delay 30
 UV=$(shell which uv)
 
 globalsign_root_r3.der:
@@ -32,6 +34,9 @@ clean:
 	rm -f metadata.json globalsign_root_r3.der fido_alliance_mds.jwt iana_cose_algs.csv google_hardware_attestation_root_ca.json apple_webauthn_root_ca.pem
 
 all: metadata.json apple_webauthn_root_ca.pem google_hardware_attestation_root_ca.json
+
+# do not leave a half written or empty file behind when a download or the metadata update fails
+.DELETE_ON_ERROR:
 
 .DEFAULT_GOAL:= all
 .PHONY: all

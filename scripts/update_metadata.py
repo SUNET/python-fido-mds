@@ -116,4 +116,8 @@ def get_metadata(metadata_path: Path, root_cert_path: Path) -> Dict[str, Any]:
 
 
 if __name__ == "__main__":
-    print(json.dumps(get_metadata(metadata_path=METADATA, root_cert_path=ROOT_CERT), indent=4))
+    metadata = get_metadata(metadata_path=METADATA, root_cert_path=ROOT_CERT)
+    if metadata is None:
+        # a non-zero exit makes `make` fail instead of leaving `null` as the package data
+        sys.exit("Could not load and verify the FIDO metadata")
+    print(json.dumps(metadata, indent=4))

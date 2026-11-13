@@ -1,0 +1,11 @@
+version: 2
+updates:
+  # the hash-locked requirements of the release job (.github/requirements/)
+  - package-ecosystem: "pip"
+    directory: "/.github/requirements"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

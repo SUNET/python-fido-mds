@@ -1,0 +1,76 @@
+name: Audit locked requirements
+
+# The release job installs hash-locked requirements (.github/requirements/). They do not change by themselves, so
+# check on a schedule that they have no known vulnerabilities, and that they still install, whenever they change.
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # 06:00 UTC on Mondays
+  pull_request:
+    paths:
+      - '.github/requirements/**'
+      - '.github/workflows/audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.github/requirements/**'
+      - '.github/workflows/audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Known vulnerabilities in the locked requirements
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # pip-audit evaluates the environment markers of the locked requirements against its own interpreter, so
+        # each Python is audited separately: some pins exist only for 3.10
+        python-version: ["3.10", "3.x"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install pip-audit
+        run: |
+          python3 -m venv "$RUNNER_TEMP/audit"
+          "$RUNNER_TEMP/audit/bin/pip" install --require-hashes --only-binary :all: -r .github/requirements/requirements-audit.txt
+      - name: Audit the locked requirements
+        run: |
+          "$RUNNER_TEMP/audit/bin/pip-audit" --disable-pip --require-hashes \
+            -r .github/requirements/requirements-bootstrap.txt \
+            -r .github/requirements/requirements-release.txt \
+            -r .github/requirements/requirements-test.txt
+      - name: Audit the requirements of pip-audit itself
+        # pip-audit audits only the files it is given, not its own environment. Only on the latest 3.x: on 3.10 the
+        # newest filelock that supports it (4.1.0) has known vulnerabilities that are fixed only in versions that
+        # need Python 3.11, so this would fail every week without anything to do about it.
+        if: ${{ !cancelled() && matrix.python-version == '3.x' }}
+        run: |
+          "$RUNNER_TEMP/audit/bin/pip-audit" --disable-pip --require-hashes \
+            -r .github/requirements/requirements-audit.txt
+
+  install:
+    name: The locked requirements install
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.x"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install the requirements of the release job
+        run: |
+          python3 -m venv "$RUNNER_TEMP/release"
+          "$RUNNER_TEMP/release/bin/pip" install --require-hashes --only-binary :all: -r .github/requirements/requirements-bootstrap.txt
+          "$RUNNER_TEMP/release/bin/pip" install --require-hashes --only-binary :all: -r .github/requirements/requirements-release.txt
+          "$RUNNER_TEMP/release/bin/pip" install --require-hashes --only-binary :all: -r .github/requirements/requirements-test.txt
