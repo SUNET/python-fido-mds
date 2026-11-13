@@ -167,10 +167,11 @@ class MetadataStatement(BaseModel):
     authentication_algorithms: List[str] = Field(..., alias="authenticationAlgorithms")
     public_key_alg_and_encodings: List[str] = Field(..., alias="publicKeyAlgAndEncodings")
     attestation_types: List[str] = Field(..., alias="attestationTypes")
-    user_verification_details: List[List["UserVerificationDetail"]] = Field(..., alias="userVerificationDetails")
+    # Software authenticators (password managers) are published without userVerificationDetails and attachmentHint
+    user_verification_details: List[List["UserVerificationDetail"]] = Field([], alias="userVerificationDetails")
     key_protection: List[str] = Field(..., alias="keyProtection")
     matcher_protection: List[str] = Field(..., alias="matcherProtection")
-    attachment_hint: List[str] = Field(..., alias="attachmentHint")
+    attachment_hint: List[str] = Field([], alias="attachmentHint")
     tc_display: List[str] = Field(..., alias="tcDisplay")
     attestation_root_certificates: List[str] = Field(..., alias="attestationRootCertificates")
     aaguid: Optional[str] = None
